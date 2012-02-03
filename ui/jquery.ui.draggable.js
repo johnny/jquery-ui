@@ -520,6 +520,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 				sortable._trigger("activate", event, uiSortable);
 			}
 		});
+		inst.sortables.reverse(); // Deepest should be first, to work with nested sortables
 
 	},
 	stop: function(event, ui) {
@@ -558,7 +559,7 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 	},
 	drag: function(event, ui) {
 
-		var inst = $(this).data("draggable"), self = this;
+		var inst = $(this).data("draggable"), self = this, foundSortable = false;
 
 		var checkPos = function(o) {
 			var dyClick = this.offset.click.top, dxClick = this.offset.click.left;
@@ -576,8 +577,10 @@ $.ui.plugin.add("draggable", "connectToSortable", {
 			this.instance.helperProportions = inst.helperProportions;
 			this.instance.offset.click = inst.offset.click;
 			
-			if(this.instance._intersectsWith(this.instance.containerCache)) {
-
+			if(!foundSortable && this.instance._intersectsWith(this.instance.containerCache)) {
+				// Nested sortables should only create one drop target
+				foundSortable = true;
+				
 				//If it intersects, we use a little isOver variable and set it once, so our move-in stuff gets fired only once
 				if(!this.instance.isOver) {
 
